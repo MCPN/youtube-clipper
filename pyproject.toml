@@ -10,6 +10,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 attrs = ">=22.2.0"
 python = ">=3.10"
+ttconv = ">=1.0.7"
+whoosh = ">=2.7.4"
 youtube-dl = { git = "https://github.com/ytdl-org/youtube-dl.git" }
 
 [tool.poetry.group.tests.dependencies]

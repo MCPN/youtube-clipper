@@ -1,0 +1,2 @@
+class ExtensionError(ValueError):
+    pass
