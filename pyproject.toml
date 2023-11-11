@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "youtube-clipper"
+version = "0.0.1"
+description = ""
+authors = ["Nick Proskurin <n1ckpr0s@yandex.ru>"]
+packages = [{include = "youtube_clipper"}]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+attrs = ">=22.2.0"
+python = ">=3.10"
+youtube-dl = { git = "https://github.com/ytdl-org/youtube-dl.git" }
+
+[tool.poetry.group.tests.dependencies]
+pytest = ">=7.2.2"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [
+  "poetry-core",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra"
+testpaths = []
+
+[tool.mypy]
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+strict_optional = true
