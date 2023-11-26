@@ -8,7 +8,7 @@ from youtube_clipper.downloader import SubtitlesDownloader
 from youtube_clipper.searcher import SubtitlesSearcher
 
 
-if __name__ == '__main__':
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', required=True)
     parser.add_argument('--query', required=True)
@@ -45,3 +45,7 @@ if __name__ == '__main__':
                 for offset in offsets:
                     print(f'{video_url}&t={int(offset)}s')
             print(Style.RESET_ALL)
+
+
+if __name__ == '__main__':
+    main()

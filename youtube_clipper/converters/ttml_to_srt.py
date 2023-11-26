@@ -8,7 +8,7 @@ from youtube_clipper.converters.model import SubtitlesConverter
 
 
 LOGGER = logging.getLogger(__name__)
-logging.getLogger('ttconv').setLevel(logging.ERROR)
+logging.getLogger('ttconv').setLevel(logging.ERROR)  # too much noise on the WARNING level
 
 
 class TTMLToSRTConverter(SubtitlesConverter):

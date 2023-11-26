@@ -30,6 +30,9 @@ minversion = "6.0"
 addopts = "-ra"
 testpaths = []
 
+[tool.poetry.scripts]
+youtube-clipper = "youtube_clipper.cli:main"
+
 [tool.mypy]
 warn_unused_configs = true
 disallow_untyped_defs = true
