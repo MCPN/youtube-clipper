@@ -15,7 +15,7 @@ class TTMLToSRTConverter(SubtitlesConverter):
     ext_from = '.ttml'
     ext_to = '.srt'
 
-    def _convert(self, source_filename: str, output_filename) -> None:
+    def _convert(self, source_filename: str, output_filename: str) -> None:
         """
         See ttconv docs:
         https://github.com/sandflow/ttconv/blob/master/doc/imsc_reader.md
