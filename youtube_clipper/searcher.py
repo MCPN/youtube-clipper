@@ -1,10 +1,15 @@
+from pathlib import Path
+
 import attr
-import srt
 from whoosh.fields import NUMERIC, Schema, TEXT
 from whoosh.index import Index, create_in
 from whoosh.qparser import OrGroup, QueryParser
 
 
+from youtube_clipper.parsers.registry import PARSERS_REGISTRY
+
+
+# 1-to-1 correspondence with youtube_clipper.parsers.model:Subtitle
 SCHEMA = Schema(id=NUMERIC(stored=True), offset=NUMERIC(stored=True), content=TEXT)
 
 
@@ -17,17 +22,21 @@ class SubtitlesSearcher:
 
     def add_subtitles(self, filename: str) -> None:
         writer = self.index.writer()
-        with open(filename) as f:
-            subtitles = srt.parse(f.read())
-        for subtitle in subtitles:
-            writer.add_document(id=subtitle.index, offset=subtitle.start.total_seconds(), content=subtitle.content)
+        parser = PARSERS_REGISTRY[Path(filename).suffix]
+        for subtitle in parser().parse_subtitles(filename):
+            writer.add_document(**attr.asdict(subtitle))
         writer.commit()
 
+    def get_query_parser(self) -> QueryParser:
+        og = OrGroup.factory(0.9)  # https://whoosh.readthedocs.io/en/latest/parsing.html#common-customizations
+        return QueryParser('content', self.index.schema, group=og)
+
+    def normalize_query_string(self, query_string: str) -> str:
+        return query_string.lower().translate(str.maketrans('', '', '.,!?'))
+
     def search(self, query_string: str) -> list[float]:
-        og = OrGroup.factory(0.9)
-        parser = QueryParser('content', self.index.schema, group=og)
-        normalized_query = query_string.lower().translate(str.maketrans('', '', '.,!?'))
-        query = parser.parse(normalized_query)
+        query_parser = self.get_query_parser()
+        query = query_parser.parse(self.normalize_query_string(query_string))
 
         with self.index.searcher() as searcher:
             results = searcher.search(query)
