@@ -26,7 +26,7 @@ def main() -> None:
             output_dir=subs_dir,
         )
 
-        for filename in downloader.download_subtitles(args.url):
+        for filename in downloader.get_subtitles(args.url):
             # Path(filename).stem would only remove the last extension, and
             # a file from SubtitlesDownloader.download_subtitles would typically
             # have multiple, e.g. *.en.ttml

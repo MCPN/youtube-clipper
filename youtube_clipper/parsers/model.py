@@ -1,5 +1,4 @@
 import abc
-from collections.abc import Generator
 
 import attr
 
@@ -13,5 +12,5 @@ class Subtitle:
 
 class SubtitleParser(abc.ABC):
     @abc.abstractmethod
-    def parse_subtitles(self, filename: str) -> Generator[Subtitle, None, None]:
+    def parse_subtitles(self, filename: str) -> list[Subtitle]:
         pass
