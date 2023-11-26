@@ -39,5 +39,5 @@ class SubtitlesSearcher:
         query = query_parser.parse(self.normalize_query_string(query_string))
 
         with self.index.searcher() as searcher:
-            results = searcher.search(query)
+            results = searcher.search(query, limit=None)
             return [result['offset'] for result in results]
