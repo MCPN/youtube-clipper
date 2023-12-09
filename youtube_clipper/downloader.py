@@ -30,6 +30,15 @@ class SubtitlesDownloader:
         converted_dir.mkdir(parents=True, exist_ok=True)  # ensure the dir exists
         self._converted_dir = str(converted_dir)
 
+    @staticmethod
+    def get_url_from_filename(filename: str) -> str:
+        # Path(filename).stem would only remove the last extension, and
+        # a file from SubtitlesDownloader.download_subtitles would typically
+        # have multiple, e.g. *.en.ttml
+        path = Path(filename)
+        video_id = path.name.removesuffix(''.join(path.suffixes))
+        return f'https://www.youtube.com/watch?v={video_id}'
+
     def download_subtitles(self, url: str) -> None:
         youtube_dl_params = dict(
             skip_download=True,  # don't download a video itself
@@ -66,7 +75,7 @@ class SubtitlesDownloader:
                 LOGGER.info(f'Going to convert {path} with a {converter.__name__}')
                 converted_filename = converter(output_dir=self._converted_dir).convert(str(path))
                 yield converted_filename
-            elif ext in PARSERS_REGISTRY:  # can be parsed straight away
+            elif ext in PARSERS_REGISTRY:  # can be parsed right away
                 yield str(path)
             else:
                 LOGGER.warning(f'Unknown extension {ext} for a file {path}')
