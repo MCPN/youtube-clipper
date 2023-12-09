@@ -23,9 +23,9 @@ class TTMLToSRTConverter(SubtitlesConverter):
         """
 
         xml_doc = ET.parse(source_filename)
-        logging.info(f'Loading a ttml model for {source_filename}')
+        LOGGER.info(f'Loading a ttml model for {source_filename}')
         doc = imsc_reader.to_model(xml_doc)
-        logging.info(f'Converting {source_filename} to srt')
+        LOGGER.info(f'Converting {source_filename} to srt')
         with open(output_filename, 'w') as f:
             print(srt_writer.from_model(doc), file=f)
-        logging.info(f'Conversion completed!')
+        LOGGER.info(f'Conversion completed!')
