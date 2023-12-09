@@ -9,14 +9,22 @@ from youtube_clipper.parsers.registry import PARSERS_REGISTRY
 
 
 # 1-to-1 correspondence with youtube_clipper.parsers.model:Subtitle
-SCHEMA = Schema(id=NUMERIC(stored=True), offset=NUMERIC(stored=True), content=TEXT)
+SEARCH_SCHEMA = Schema(id=NUMERIC(stored=True), offset=NUMERIC(stored=True), content=TEXT)
+
+
+@attr.s
+class SearchResult:
+    offset: float = attr.ib()
+    score: float = attr.ib()
 
 
 @attr.s
 class SubtitlesSearcher:
     index_directory: str = attr.ib()
+    limit: int | None = attr.ib(default=None)
+
     index: Index = attr.ib(init=False, default=attr.Factory(
-        lambda self: create_in(self.index_directory, SCHEMA), takes_self=True,
+        lambda self: create_in(self.index_directory, SEARCH_SCHEMA), takes_self=True,
     ))
 
     def get_query_parser(self) -> QueryParser:
@@ -34,10 +42,10 @@ class SubtitlesSearcher:
             writer.add_document(**attr.asdict(subtitle))
         writer.commit()
 
-    def search(self, query_string: str) -> list[float]:
+    def search(self, query_string: str) -> list[SearchResult]:
         query_parser = self.get_query_parser()
         query = query_parser.parse(self.normalize_query_string(query_string))
 
         with self.index.searcher() as searcher:
-            results = searcher.search(query, limit=None)
-            return [result['offset'] for result in results]
+            results = searcher.search(query, limit=self.limit)
+            return [SearchResult(offset=result['offset'], score=result.score) for result in results]
