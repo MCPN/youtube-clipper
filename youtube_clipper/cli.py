@@ -36,6 +36,13 @@ def main() -> None:
         action='store_true',
         help='if set, will show a search score next to a link',
     )
+    searcher_args.add_argument('--search-limit', required=False, type=int, help='limit for search results per video')
+    searcher_args.add_argument(
+        '--deduplication-range',
+        required=False,
+        type=float,
+        help='if set, will deduplicate results with offsets within provided range',
+    )
 
     args = parser.parse_args()
     colorama.init(autoreset=True)
@@ -55,7 +62,11 @@ def main() -> None:
             video_url = downloader.get_url_from_filename(filename)
             print(Fore.YELLOW + f'Searching for "{args.query}" in {video_url}')
 
-            searcher = SubtitlesSearcher(tempdir)
+            searcher = SubtitlesSearcher(
+                index_directory=tempdir,
+                limit=args.search_limit,
+                deduplication_range=args.deduplication_range,
+            )
             searcher.add_subtitles(filename)
             results = searcher.search(args.query)
             if not results:

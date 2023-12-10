@@ -6,5 +6,5 @@ from youtube_clipper.searcher import SEARCH_SCHEMA
 
 def test_searcher_schema():
     model_fields = set(attr.fields_dict(Subtitle))
-    schema_fields = {key for key, value in SEARCH_SCHEMA.items()}
-    assert model_fields == schema_fields
+    schema_fields = set(SEARCH_SCHEMA.names())
+    assert model_fields == schema_fields == {"id", "offset", "content"}
