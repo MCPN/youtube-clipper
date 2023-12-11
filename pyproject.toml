@@ -13,6 +13,7 @@ colorama = ">=0.4.6"
 python = ">=3.10"
 srt = ">=3.5.3"
 ttconv = ">=1.0.7"
+webvtt-py = ">=0.4.6"
 whoosh = ">=2.7.4"
 yt-dlp = ">=2023.10.13"
 
