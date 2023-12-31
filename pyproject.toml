@@ -10,7 +10,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 attrs = ">=22.2.0"
 colorama = ">=0.4.6"
-python = ">=3.10"
+python = ">=3.10, <3.12"
 srt = ">=3.5.3"
 ttconv = ">=1.0.7"
 webvtt-py = ">=0.4.6"
