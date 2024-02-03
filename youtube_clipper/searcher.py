@@ -29,11 +29,11 @@ class SubtitlesSearcher:
         lambda self: create_in(self.index_directory, SEARCH_SCHEMA), takes_self=True,
     ))
 
-    def get_query_parser(self) -> QueryParser:
+    def _get_query_parser(self) -> QueryParser:
         og = OrGroup.factory(0.9)  # https://whoosh.readthedocs.io/en/latest/parsing.html#common-customizations
         return QueryParser('content', self.index.schema, group=og)
 
-    def normalize_query_string(self, query_string: str) -> str:
+    def _normalize_query_string(self, query_string: str) -> str:
         return query_string.lower().translate(str.maketrans('', '', '.,!?'))
 
     def parse_results(self, results: Results) -> list[SearchResult]:
@@ -54,18 +54,18 @@ class SubtitlesSearcher:
         current_result = sorted_results[0]
         kept_ids: set[int] = set()
         for result in sorted_results[1:]:
-            # first case - the next result is far enough from the current one
+            # the first case - the next result is far enough from the current one
             # this means the current result is safe and we can add it to the final result
             if result['offset'] - current_result['offset'] > self.deduplication_range:
                 kept_ids.add(current_result['id'])
                 current_result = result
 
-            # second case - the next result is in the range and it's better
-            # than the current one. then we just replace the current result
+            # the second case - the next result is in the range and it's better
+            # than the current one; we just replace the current result
             elif result.score > current_result.score:
                 current_result = result
 
-            # last case - the next result is in the range and it's worse
+            # the last case - the next result is in the range and it's worse
             # we just skip it
             # else: pass
 
@@ -78,16 +78,23 @@ class SubtitlesSearcher:
         ]
 
     def add_subtitles(self, filename: str) -> None:
+        """
+        Parses a subtitles file and adds subtitles to the search index
+        Parser is chosen based on a file extension
+        """
         writer = self.index.writer()
         parser = PARSERS_REGISTRY[Path(filename).suffix]
         for subtitle in parser().parse_subtitles(filename):
-            subtitle.content = self.normalize_query_string(subtitle.content)
+            subtitle.content = self._normalize_query_string(subtitle.content)
             writer.add_document(**attr.asdict(subtitle))
         writer.commit()
 
     def search(self, query_string: str) -> list[SearchResult]:
-        query_parser = self.get_query_parser()
-        query = query_parser.parse(self.normalize_query_string(query_string))
+        """
+        Perform a search on previously added subtitles
+        """
+        query_parser = self._get_query_parser()
+        query = query_parser.parse(self._normalize_query_string(query_string))
 
         with self.index.searcher() as searcher:
             results = searcher.search(query, limit=self.limit)
