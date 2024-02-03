@@ -1,8 +1,8 @@
 # youtube-clipper
 
-Tool for finding clips in YouTube videos. Supports searching in multiple videos, i.e. in playlists or channels.
+Tool for finding clips in YouTube videos. Supports searching in multiple videos, e.g. in playlists or channels.
 
-YouTube Clipper (YTC) download subtitles (without the videos itself) using [yt-dlp](https://github.com/yt-dlp/yt-dlp), parses them using provided parsers and converters and performs the search using [whoosh](https://whoosh.readthedocs.io). 
+YouTube Clipper (YTC) download subtitles (without the videos themselves) using [yt-dlp](https://github.com/yt-dlp/yt-dlp), parses them using provided parsers and converters and performs the search using [whoosh](https://whoosh.readthedocs.io). 
 
 ## Installation from source
 
@@ -17,7 +17,11 @@ Basic usage: `youtube-clipper --url https://www.youtube.com/watch?v=dQw4w9WgXcQ 
 
 For a full list of settings, run `youtube-clipper --help`.
 
-The query argument supports the whoosh query language that can be found in the [official documentation](https://whoosh.readthedocs.io/en/latest/querylang.html). For example, by default query doesn't require every word to appear in the result, however, this behaviour can be enabled by wrapping the query in "brackets" (be careful with bash escaping tho!).
+The query argument supports the whoosh query language that can be found in the [official documentation](https://whoosh.readthedocs.io/en/latest/querylang.html). For example, by default query doesn't require every word to appear in the result, however, this behaviour can be enabled by wrapping the query in "brackets" (be careful with the bash escaping tho!).
+
+## Parsers and converters
+
+TODO
 
 ## Tests
 
