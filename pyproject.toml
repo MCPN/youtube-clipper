@@ -4,7 +4,7 @@ version = "0.0.1"
 description = ""
 authors = ["Nick Proskurin <n1ckpr0s@yandex.ru>"]
 packages = [{include = "youtube_clipper"}]
-license = "MIT License"
+license = "BSD 3-Clause License"
 readme = "README.md"
 
 [tool.poetry.dependencies]
