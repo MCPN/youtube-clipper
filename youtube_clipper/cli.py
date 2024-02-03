@@ -9,14 +9,14 @@ from youtube_clipper.searcher import SubtitlesSearcher
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser('youtube-clipper')
+    parser = argparse.ArgumentParser('youtube-clipper', description='YouTube Clipper - tool for finding youtube clips')
     parser.add_argument(
         '--url',
         required=True,
-        help='youtube URL. Can be any link supported by yt-dlp: a video, a channel, a playlist, etc.\n'
-             'In case of multiple videos, search will be performed in every video independently',
+        help='can be any youtube URL supported by yt-dlp: a video, a channel, a playlist, etc; '
+             'in case of multiple videos in the output, search will be performed for every video separately',
     )
-    parser.add_argument('--query', required=True, help='Query to search for')
+    parser.add_argument('--query', required=True, help='query to search for')
 
     yt_dlp_args = parser.add_argument_group('yt-dlp arguments')
     yt_dlp_args.add_argument(
