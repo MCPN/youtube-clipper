@@ -5,7 +5,7 @@ import colorama
 from colorama import Fore
 
 from youtube_clipper.downloader import SubtitlesDownloader
-from youtube_clipper.searcher import SubtitlesSearcher
+from youtube_clipper.searcher import DeduplicationMode, SubtitlesSearcher
 from youtube_clipper.utils import get_available_formats, get_url_from_filename
 
 
@@ -37,10 +37,15 @@ def main() -> None:
     )
     searcher_args.add_argument('--search-limit', required=False, type=int, help='limit for search results per video')
     searcher_args.add_argument(
-        '--deduplication-range',
-        required=False,
-        type=float,
-        help='if set, will deduplicate results with offsets within provided range',
+        '--enable-pairwise-group',
+        action='store_true',
+        help='if set, will merge successive overlapping subtitle pairs into one',
+    )
+    searcher_args.add_argument(
+        '--deduplication-mode',
+        default='keep_first',
+        type=DeduplicationMode,
+        help='deduplication mode for consecutive subtitle matches',
     )
 
     args = parser.parse_args()
@@ -69,6 +74,8 @@ def main() -> None:
             searcher = SubtitlesSearcher(
                 index_directory=tempdir,
                 limit=args.search_limit,
+                enable_pairwise_group=args.enable_pairwise_group,
+                deduplication_mode=args.deduplication_mode,
             )
             searcher.add_subtitles(filename)
             results = searcher.search(args.query)
