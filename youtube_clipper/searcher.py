@@ -1,3 +1,4 @@
+from enum import Enum
 from itertools import pairwise
 from pathlib import Path
 
@@ -21,18 +22,29 @@ class SearchResult:
     score: float = attr.ib()
 
 
+class DeduplicationMode(Enum):
+    DISABLE = 'disable'
+    KEEP_FIRST = 'keep_first'
+    KEEP_LAST = 'keep_last'
+
+
 @attr.s
 class SubtitlesSearcher:
     index_directory: str = attr.ib()
     limit: int | None = attr.ib(default=None)
-    deduplication_range: float | None = attr.ib(default=None)
+
+    enable_pairwise_group: bool = attr.ib(default=True)
+    deduplication_mode: DeduplicationMode = attr.ib(default=DeduplicationMode.KEEP_FIRST)
 
     index: Index = attr.ib(init=False, default=attr.Factory(
         lambda self: create_in(self.index_directory, SEARCH_SCHEMA), takes_self=True,
     ))
 
     def _get_query_parser(self) -> QueryParser:
-        og = OrGroup.factory(0.9)  # https://whoosh.readthedocs.io/en/latest/parsing.html#common-customizations
+        """
+        See https://whoosh.readthedocs.io/en/latest/parsing.html#common-customizations
+        """
+        og = OrGroup.factory(0.9)
         return QueryParser('content', self.index.schema, group=og)
 
     def _normalize(self, text: str) -> str:
@@ -40,59 +52,56 @@ class SubtitlesSearcher:
 
     def parse_results(self, results: Results) -> list[SearchResult]:
         """
-        if deduplication_range is not None, performs a deduplication:
-        sort the results by offset and iterate them from left to right;
-        if we encounter two results within the deduplication range,
-        we keep the best by score or the first one in case
-        of equal scores
+        TODO
         """
-        if self.deduplication_range is None:  # deduplication is disabled
+        if not results or self.deduplication_mode == DeduplicationMode.DISABLE:  # skip deduplication
             return [SearchResult(offset=result['offset'], score=result.score) for result in results]
 
-        sorted_results = sorted(results, key=lambda x: x['offset'])
-        if not sorted_results:
-            return []
-
-        current_result = sorted_results[0]
-        kept_ids: set[int] = set()
-        for result in sorted_results[1:]:
-            # the first case - the next result is far enough from the current one
-            # this means the current result is safe and we can add it to the output
-            if result['offset'] - current_result['offset'] > self.deduplication_range:
-                kept_ids.add(current_result['id'])
-                current_result = result
-
-            # the second case - the next result is in the range and it's better
-            # than the current one; we just replace the current result
-            elif result.score > current_result.score:
-                current_result = result
-
-            # the last case - the next result is in the range and it's worse
-            # we just skip it
-            # else: pass
-
-        if current_result['id'] not in kept_ids:
-            kept_ids.add(current_result['id'])
+        ids = sorted(result['id'] for result in results)
+        kept_ids: set[int] = {ids[0]}  # to cover a corner case of len(results) == 1
+        removed_ids: set[int] = set()
+        for id_pair in pairwise(ids):  # type: tuple[int, int]
+            if id_pair[0] + 1 == id_pair[1]:  # consecutive subtitles - perform a deduplication
+                if self.deduplication_mode == DeduplicationMode.KEEP_FIRST:
+                    kept_ids.add(id_pair[0])
+                    removed_ids.add(id_pair[1])
+                elif self.deduplication_mode == DeduplicationMode.KEEP_LAST:
+                    removed_ids.add(id_pair[0])
+                    kept_ids.add(id_pair[1])
+                else:
+                    raise ValueError(f'Unknown deduplication mode {self.deduplication_mode}')
+            else:  # non-consecutive subtitles - keep both
+                kept_ids.add(id_pair[0])
+                kept_ids.add(id_pair[1])
 
         return [  # preserving the original order
             SearchResult(offset=result['offset'], score=result.score)
-            for result in results if result['id'] in kept_ids
+            for result in results if result['id'] in kept_ids and result['id'] not in removed_ids
         ]
 
     def add_subtitles(self, filename: str) -> None:
         """
         Parses a subtitles file and adds subtitles to the search index
         Parser is chosen based on a file extension
+        If enable_pairwise_group is True, subtitles will be joined in pairs
         """
         writer = self.index.writer()
         parser = PARSERS_REGISTRY[Path(filename).suffix]
-        for subtitles_pair in pairwise(parser().parse_subtitles(filename)):
-            joined_subtitle = Subtitle(
-                id=subtitles_pair[0].id,
-                offset=subtitles_pair[0].offset,
-                content=self._normalize(' '.join(sub.content for sub in subtitles_pair)),
-            )
-            writer.add_document(**attr.asdict(joined_subtitle))
+        parsed_subtitles = parser().parse_subtitles(filename)
+
+        if self.enable_pairwise_group:
+            for subtitles_pair in pairwise(parsed_subtitles):  # type: tuple[Subtitle, Subtitle]
+                joined_subtitle = Subtitle(
+                    id=subtitles_pair[0].id,
+                    offset=subtitles_pair[0].offset,
+                    content=self._normalize(' '.join(sub.content for sub in subtitles_pair)),
+                )
+                writer.add_document(**attr.asdict(joined_subtitle))
+        else:
+            for subtitle in parsed_subtitles:
+                subtitle.content = self._normalize(subtitle.content)
+                writer.add_document(**attr.asdict(subtitle))
+
         writer.commit()
 
     def search(self, query_string: str) -> list[SearchResult]:

@@ -69,14 +69,13 @@ def main() -> None:
             searcher = SubtitlesSearcher(
                 index_directory=tempdir,
                 limit=args.search_limit,
-                deduplication_range=args.deduplication_range,
             )
             searcher.add_subtitles(filename)
             results = searcher.search(args.query)
             if not results:
                 print(Fore.RED + f'`{args.query}` wasn\'t found in {video_url}')
             else:
-                print(Fore.GREEN + f'Found {len(results)} (approximate) occurrences of `{args.query}` in {video_url}')
+                print(Fore.GREEN + f'Found {len(results)} (approximate) occurrence(s) of `{args.query}` in {video_url}')
                 for result in results:
                     score_str = Fore.RESET + f'(score: {result.score})' if args.show_scores else ''
                     print(Fore.GREEN + f'{video_url}&t={int(result.offset)}s {score_str}')
