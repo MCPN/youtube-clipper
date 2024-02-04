@@ -6,7 +6,7 @@ from colorama import Fore
 
 from youtube_clipper.downloader import SubtitlesDownloader
 from youtube_clipper.searcher import SubtitlesSearcher
-from youtube_clipper.utils import get_available_formats
+from youtube_clipper.utils import get_available_formats, get_url_from_filename
 
 
 def main() -> None:
@@ -63,8 +63,8 @@ def main() -> None:
         )
 
         for filename in downloader.get_subtitles(args.url):
-            video_url = downloader.get_url_from_filename(filename)
-            print(Fore.YELLOW + f'Searching for "{args.query}" in {video_url}')
+            video_url = get_url_from_filename(filename)
+            print(Fore.YELLOW + f'Searching for `{args.query}` in {video_url}')
 
             searcher = SubtitlesSearcher(
                 index_directory=tempdir,

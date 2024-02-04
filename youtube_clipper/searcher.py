@@ -1,3 +1,4 @@
+from itertools import pairwise
 from pathlib import Path
 
 import attr
@@ -6,6 +7,7 @@ from whoosh.index import Index, create_in
 from whoosh.searching import Results
 from whoosh.qparser import OrGroup, QueryParser
 
+from youtube_clipper.parsers.model import Subtitle
 from youtube_clipper.parsers.registry import PARSERS_REGISTRY
 
 
@@ -33,8 +35,8 @@ class SubtitlesSearcher:
         og = OrGroup.factory(0.9)  # https://whoosh.readthedocs.io/en/latest/parsing.html#common-customizations
         return QueryParser('content', self.index.schema, group=og)
 
-    def _normalize_query_string(self, query_string: str) -> str:
-        return query_string.lower().translate(str.maketrans('', '', '.,!?'))
+    def _normalize(self, text: str) -> str:
+        return text.lower().translate(str.maketrans('', '', '.,!?'))
 
     def parse_results(self, results: Results) -> list[SearchResult]:
         """
@@ -55,7 +57,7 @@ class SubtitlesSearcher:
         kept_ids: set[int] = set()
         for result in sorted_results[1:]:
             # the first case - the next result is far enough from the current one
-            # this means the current result is safe and we can add it to the final result
+            # this means the current result is safe and we can add it to the output
             if result['offset'] - current_result['offset'] > self.deduplication_range:
                 kept_ids.add(current_result['id'])
                 current_result = result
@@ -84,9 +86,13 @@ class SubtitlesSearcher:
         """
         writer = self.index.writer()
         parser = PARSERS_REGISTRY[Path(filename).suffix]
-        for subtitle in parser().parse_subtitles(filename):
-            subtitle.content = self._normalize_query_string(subtitle.content)
-            writer.add_document(**attr.asdict(subtitle))
+        for subtitles_pair in pairwise(parser().parse_subtitles(filename)):
+            joined_subtitle = Subtitle(
+                id=subtitles_pair[0].id,
+                offset=subtitles_pair[0].offset,
+                content=self._normalize(' '.join(sub.content for sub in subtitles_pair)),
+            )
+            writer.add_document(**attr.asdict(joined_subtitle))
         writer.commit()
 
     def search(self, query_string: str) -> list[SearchResult]:
@@ -94,7 +100,7 @@ class SubtitlesSearcher:
         Perform a search on previously added subtitles
         """
         query_parser = self._get_query_parser()
-        query = query_parser.parse(self._normalize_query_string(query_string))
+        query = query_parser.parse(self._normalize(query_string))
 
         with self.index.searcher() as searcher:
             results = searcher.search(query, limit=self.limit)

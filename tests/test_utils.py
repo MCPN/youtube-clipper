@@ -1,16 +1,17 @@
 import attr
+import pytest
 
 from youtube_clipper.converters.registry import CONVERTERS_REGISTRY
 from youtube_clipper.parsers.model import Subtitle
 from youtube_clipper.parsers.registry import PARSERS_REGISTRY
 from youtube_clipper.searcher import SEARCH_SCHEMA
-from youtube_clipper.utils import get_available_formats
+from youtube_clipper.utils import get_available_formats, get_url_from_filename
 
 
 def test_searcher_schema():
     model_fields = set(attr.fields_dict(Subtitle))
     schema_fields = set(SEARCH_SCHEMA.names())
-    assert model_fields == schema_fields == {"id", "offset", "content"}
+    assert model_fields == schema_fields == {'id', 'offset', 'content'}
 
 
 def test_converters_compatability():
@@ -19,3 +20,13 @@ def test_converters_compatability():
 
 def test_available_formats():
     assert set(get_available_formats()) == {'srt', 'ttml', 'vtt'}
+
+
+@pytest.mark.parametrize('filename', [
+    'dQw4w9WgXcQ.en.srt',
+    'dQw4w9WgXcQ.en.ttml',
+    'dQw4w9WgXcQ.ru.ttml',
+    'dQw4w9WgXcQ.srt',
+])
+def test_get_url_from_filename(filename):
+    assert get_url_from_filename(filename) == 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
