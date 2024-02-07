@@ -52,7 +52,10 @@ class SubtitlesSearcher:
 
     def parse_results(self, results: Results) -> list[SearchResult]:
         """
-        TODO
+        Parse results from searcher and perform a deduplication depending on a `self.deduplication_mode`:
+        * DeduplicationMode.DISABLE - just parse results without a deduplication
+        * DeduplicationMode.KEEP_FIRST - keep only the first subtitle in every chain of consecutive matches
+        * DeduplicationMode.KEEP_LAST - keep only the last subtitle in every chain of consecutive matches
         """
         if not results or self.deduplication_mode == DeduplicationMode.DISABLE:  # skip deduplication
             return [SearchResult(offset=result['offset'], score=result.score) for result in results]
