@@ -8,17 +8,17 @@ from youtube_clipper.searcher import SEARCH_SCHEMA
 from youtube_clipper.utils import get_available_formats, get_url_from_filename
 
 
-def test_searcher_schema():
+def test_searcher_schema() -> None:
     model_fields = set(attr.fields_dict(Subtitle))
     schema_fields = set(SEARCH_SCHEMA.names())
     assert model_fields == schema_fields == {'id', 'offset', 'content'}
 
 
-def test_converters_compatability():
+def test_converters_compatability() -> None:
     assert all(converter.ext_to in PARSERS_REGISTRY for converter in CONVERTERS_REGISTRY.values())
 
 
-def test_available_formats():
+def test_available_formats() -> None:
     assert set(get_available_formats()) == {'srt', 'ttml', 'vtt'}
 
 
@@ -28,5 +28,5 @@ def test_available_formats():
     'dQw4w9WgXcQ.ru.ttml',
     'dQw4w9WgXcQ.srt',
 ])
-def test_get_url_from_filename(filename):
+def test_get_url_from_filename(filename: str) -> None:
     assert get_url_from_filename(filename) == 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
