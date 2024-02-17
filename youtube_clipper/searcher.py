@@ -117,3 +117,13 @@ class SubtitlesSearcher:
         with self.index.searcher() as searcher:
             results = searcher.search(query, limit=self.limit)
             return self.parse_results(results)
+
+    def clear(self) -> None:
+        """
+        Clear the current index of all previously added documents
+        """
+        writer = self.index.writer()
+        for docnum in range(self.index.doc_count()):
+            writer.delete_document(docnum)
+        writer.commit()
+        assert self.index.doc_count() == 0
