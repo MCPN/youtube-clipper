@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +28,21 @@ jobs:
         pip install poetry==1.6.1
         poetry export -f requirements.txt --with tests > requirements.txt
         pip install -r requirements.txt
+
+  pytest:
+    runs-on: ubuntu-latest
+
+    needs: [ build ]
+
+    steps:
+    - name: Run pytest
+      run: pytest tests
+
+  mypy:
+    runs-on: ubuntu-latest
+
+    needs: [ build ]
+
+    steps:
     - name: Run mypy
       run: mypy youtube_clipper tests
-    - name: Test with pytest
-      run: pytest tests
