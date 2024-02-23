@@ -8,7 +8,8 @@ YouTube Clipper (YTC) downloads subtitles (without videos themselves) using [yt-
 
 ### From PyPI
 
-Coming soon!
+1. Create and activate a virtualenv: `python3 -m venv .venv && source .venv/bin/activate`.
+2. Install `youtube-clipper` using `pip`: `pip install youtube-clipper`
 
 ### From source
 
