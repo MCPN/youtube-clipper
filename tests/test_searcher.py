@@ -1,7 +1,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from youtube_clipper.searcher import SubtitlesSearcher, DeduplicationMode
+from youtube_clipper.searcher import DeduplicationMode, SearchResult, SubtitlesSearcher
 
 import tests.test_data
 
@@ -11,6 +11,26 @@ TEST_DATA_DIR = Path(tests.test_data.__file__).parent
 
 def get_testing_data(filename: str) -> str:
     return str(TEST_DATA_DIR / filename)
+
+
+def get_timestamps(results: list[SearchResult]) -> set[float]:
+    return {result.offset for result in results}
+
+
+def test_basic_search() -> None:
+    test_filename = get_testing_data('mEVnj0BOFbE.en.vtt')
+    query = "Vaporeon"
+    expected_timestamps = {4.56, 6.71, 6.72, 10.24, 12.39, 12.4, 29.119, 31.269, 31.279, 60.559, 62.79, 62.8}
+
+    with TemporaryDirectory() as tempdir:
+        searcher = SubtitlesSearcher(tempdir, enable_pairwise_group=False, deduplication_mode=DeduplicationMode.DISABLE)
+        searcher.add_subtitles(test_filename)
+        assert get_timestamps(searcher.search(query)) == expected_timestamps
+
+        searcher.limit = 5
+        results = searcher.search(query)
+        assert len(results) == 5
+        assert get_timestamps(results).issubset(expected_timestamps)
 
 
 def test_pairwise_group() -> None:

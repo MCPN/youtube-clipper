@@ -33,7 +33,7 @@ class SubtitlesSearcher:
     index_directory: str = attr.ib()
     limit: int | None = attr.ib(default=None)
 
-    enable_pairwise_group: bool = attr.ib(default=True)
+    enable_pairwise_group: bool = attr.ib(default=False)
     deduplication_mode: DeduplicationMode = attr.ib(default=DeduplicationMode.KEEP_FIRST)
 
     index: Index = attr.ib(init=False, default=attr.Factory(
