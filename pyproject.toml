@@ -1,11 +1,13 @@
 [tool.poetry]
 name = "youtube-clipper"
-version = "1.0.2"
+version = "1.0.3"
 description = "Tool for finding clips in YouTube videos"
 authors = ["Nick Proskurin <n1ckpr0s@yandex.ru>"]
 packages = [{include = "youtube_clipper"}]
 license = "BSD 3-Clause License"
 readme = "README.md"
+homepage = "https://github.com/MCPN/youtube-clipper"
+repository = "https://github.com/MCPN/youtube-clipper"
 
 [tool.poetry.dependencies]
 attrs = "==23.2.0"
