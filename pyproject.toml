@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "youtube-clipper"
-version = "1.0.3"
+version = "1.0.4"
 description = "Tool for finding clips in YouTube videos"
 authors = ["Nick Proskurin <n1ckpr0s@yandex.ru>"]
 packages = [{include = "youtube_clipper"}]
@@ -10,19 +10,19 @@ homepage = "https://github.com/MCPN/youtube-clipper"
 repository = "https://github.com/MCPN/youtube-clipper"
 
 [tool.poetry.dependencies]
-attrs = "==23.2.0"
-colorama = "==0.4.6"
+attrs = ">=23.2.0"
+colorama = ">=0.4.6"
 python = ">=3.10, <4"
-srt = "==3.5.3"
-ttconv = "==1.0.8"
-webvtt-py = "==0.4.6"
-whoosh = "==2.7.4"
-yt-dlp = "==2023.12.30"
+srt = ">=3.5.3"
+ttconv = ">=1.0.8"
+webvtt-py = ">=0.4.6"
+whoosh = ">=2.7.4"
+yt-dlp = ">=2024.07.07"
 
 [tool.poetry.group.tests.dependencies]
-pytest = "==8.0.0"
-mypy = "==1.8.0"
-types-colorama = "==0.4.15"
+pytest = ">=8.0.0"
+mypy = ">=1.8.0"
+types-colorama = ">=0.4.15"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

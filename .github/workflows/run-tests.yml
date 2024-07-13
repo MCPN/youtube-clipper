@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install poetry==1.6.1
+        pip install poetry==1.7.1
         poetry export -f requirements.txt --with tests > requirements.txt
         pip install -r requirements.txt
     - name: Run mypy
